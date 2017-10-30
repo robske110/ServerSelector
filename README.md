@@ -21,8 +21,12 @@ Removing servers works the same, the command is `serverselector rem <hostname> [
 - **Open with item(s)**
 
     You can configure items which will open the ServerSelector.    
-    - selector-open-items`: An array containing the Item ID(s) which open the ServerSelector. Default is the Compass (345)
-    - `selector-item-open-levels`: An array containg the levels the item(s) will open the ServerSelector. Default is null (~), therefore activated in all levels.
+    - selector-open-items`: An array containing the Item ID(s) which open the ServerSelector. The default is the Compass (345)
+    - `selector-item-open-levels`: An array containg the levels the item(s) will open the ServerSelector. The default is null (~), therefore activated in all levels.
+
+- **Hiding offline Servers**
+    
+    You can configure if you want to display offline servers with `selector.offline.lineX` (defined in styles.yml) or hide them from the list with `hide-offline`. The default is false.
 
 - **Hiding unknown Servers**
     

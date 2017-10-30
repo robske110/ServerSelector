@@ -14,6 +14,8 @@ class SelectorRenderer{
 	
 	/** @var bool */
 	private $hideUnknown;
+	/** @var bool */
+	private $hideOffline;
 	
 	/**
 	 * @param ServerSelector $plugin
@@ -29,6 +31,13 @@ class SelectorRenderer{
 	 */
 	public function setHideUnknown(bool $hideUnknown){
 		$this->hideUnknown = $hideUnknown;
+	}
+	
+	/**
+	 * @param bool $hideOffline
+	 */
+	public function setHideOffline(bool $hideOffline){
+		$this->hideOffline = $hideOffline;
 	}
 	
 	/**
@@ -48,8 +57,11 @@ class SelectorRenderer{
 		foreach($this->plugin->getServers() as $selectorServer){
 			if($selectorServer->canSee($player)){
 				if(isset($serversData[$selectorServer->getID()])){
-					$options[] = new MenuOption(implode("\n".TF::RESET,$this->calcServerButtonLines($selectorServer->getID(), $serversData[$selectorServer->getID()])));
 					$state = $serversData[$selectorServer->getID()][2] === true ? 1 : 2;
+					if($state === 2 && $this->hideOffline){
+						continue;
+					}
+					$options[] = new MenuOption(implode("\n".TF::RESET,$this->calcServerButtonLines($selectorServer->getID(), $serversData[$selectorServer->getID()])));
 				}elseif(!$this->hideUnknown){
 					$options[] = new MenuOption($this->parseStyle("selector.unknown.error")."\n".TF::WHITE.$selectorServer->getID());
 					$state = 2;
@@ -64,7 +76,7 @@ class SelectorRenderer{
 			)
 		);
 		$optionResponses[] = [0];
-		$form = new ServerSelectorForm($player, $optionResponses, $this, "ServerSelector", "Select the server you want to switch to:", $options);
+		$form = new ServerSelectorForm($player, $optionResponses, $this, $this->parseStyle("selector.title"), $this->parseStyle("selector.introduction-text"), $options);
 		$player->sendForm($form);
 	}
 	
@@ -75,8 +87,8 @@ class SelectorRenderer{
 	 * @return string
 	 */
 	private function parseStyle(string $styleID, array $vars = []): string{
-		$varSep = $this->styleCfg->get("variableSeparator");
-		$str = $this->styleCfg->get($styleID);
+		$varSep = $this->styleCfg->get("variableSeparator", "%");
+		$str = $this->styleCfg->get($styleID, $styleID);
 		foreach((new \ReflectionClass(TF::class))->getConstants() as $name => $value){
 			$vars[$name] = $value;
 		}

@@ -56,6 +56,8 @@ class ServerSelector extends PluginBase{
 		"selector.loading.line2" => "%GOLD%Loading... %WHITE%%playercount%",
 		"selector.unknown.error" => "%RED%An error occurred while processing the Server:",
 		"selector.refresh-button" => "%GREEN%Refresh\nLast refresh %DARK_GRAY%%lastrefresh%%GREEN%s ago",
+		"selector.title" => "ServerSelector",
+		"selector.introduction-text" => "Select the server you want to switch to:",
 		"variableSeparator" => "%"
 	];
 	
@@ -83,20 +85,22 @@ class ServerSelector extends PluginBase{
 			/*$this->serverSelectorCfg->set('selector-item-status-display', true);
 			$this->serverSelectorCfg->set('selector-item-online', );
 			$this->serverSelectorCfg->set('selector-item-offline', );*/
+			$this->serverSelectorCfg->set('hide-offline', false);
 			$this->serverSelectorCfg->set('hide-unknown', false);
-			$this->serverSelectorCfg->set('ConfigVersion', 0.1);
+			$this->serverSelectorCfg->set('ConfigVersion', 0.2);
 		}
 		$this->serverSelectorCfg->save();
 		
 		$this->selectorRenderer = new SelectorRenderer($this, new Config($this->getDataFolder()."styles.yml", Config::YAML, self::DEFAULT_STYLES));
 		$this->selectorRenderer->setHideUnknown((bool) $this->serverSelectorCfg->get('hide-unknown'));
+		$this->selectorRenderer->setHideOffline((bool) $this->serverSelectorCfg->get('hide-offline'));
 		
 		$this->selectorServersManager = new SelectorServersManager($this);
 		$this->db = new Config($this->getDataFolder()."ServerSelectorDB.yml", Config::YAML, []); //TODO:betterDB
 		foreach($this->db->getAll() as $savedServer){
 			$server = SelectorServer::createFromSaveData($savedServer);
 			if(!$this->addServer($server)){
-				throw new \Exception("Failure while registering server ".$server->getID().": Server already registered");
+				throw new \InvalidStateException("Failure while registering server ".$server->getID().": Server already registered");
 			}
 		}
 		
