@@ -6,14 +6,35 @@ The ServerSelector, with the default style looks like this:
 This plugin depends on SignServerStats, you also have to have it installed!
 
 ## Usage:
-Anyone with the permission `ServerSelector.openList` can open the server selector using the command /serverlist or using the item defined in the config.yml in the levels defined in config.yml
+Anyone with the permission `ServerSelector.openList` can open the server selector using the command `/serverlist` or `/serverselector show` or using the item defined in the config.yml (default Compass). (For information how to change the item, see [Configuration](README.md#Configuration))
 
-You can edit the style in styles.yml. Simply use %COLOUR% (as defined [here](https://github.com/pmmp/PocketMine-MP/blob/master/src/pocketmine/utils/TextFormat.php#L32-L54)) for colours and see the example style for special variables.
+## Configuration:
+
+### Adding Servers:
+
+Adding servers is easy and can be done in-game as well as from the console. Simply use the command `serverselector add <hostname> [port]` to add a server.
+If the server has the port 19132 you do not need to define the port.
+Removing servers works the same, the command is `serverselector rem <hostname> [Portz]` for that. 
+
+### config.yml
+
+- **Open with item(s)**
+
+    You can configure items which will open the ServerSelector.    
+    - selector-open-items`: An array containing the Item ID(s) which open the ServerSelector. Default is the Compass (345)
+    - `selector-item-open-levels`: An array containg the levels the item(s) will open the ServerSelector. Default is null (~), therefore activated in all levels.
+
+- **Hiding unknown Servers**
+    
+    You can configure if you want to display `selector.unknown.error` (defined in styles.yml) if the plugin fails to fetch info for a server with `hide-unknown`. The default is false.
+
+### styles.yml
+You can edit the style in styles.yml, which is generated in the same directory config.yml is located in. Simply use %COLOUR% (replace COLOUR with the names defined [here](https://github.com/pmmp/PocketMine-MP/blob/master/src/pocketmine/utils/TextFormat.php#L32-L54)) for colours and see the default styles.yml for the special variables (which are %specialVarName%).
 
 ## API:
 **This plugin has a powerful API, which can mainly modify the server list, prevent it to open under certain conditions, and open it for certain players.**
 
-**For a "documentation", check the code.**
+**A basic documentation is currently WIP, until it is finished you might find the function/event you need by reading the source code.**
 
 _You should always check if your plugin is compatible with the version of ServerSelector present on the current server with the help of the isCompatible function:_
 

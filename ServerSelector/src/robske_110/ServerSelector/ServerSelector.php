@@ -54,7 +54,7 @@ class ServerSelector extends PluginBase{
 		"selector.offline.line2" => "%DARK_RED%Offline %playercount%",
 		"selector.loading.line1" => "%ip%%WHITE%:%BLACK%%port%",
 		"selector.loading.line2" => "%GOLD%Loading... %WHITE%%playercount%",
-		"selector.unknown.error" => "%RED%An error occurred while processing the Server",
+		"selector.unknown.error" => "%RED%An error occurred while processing the Server:",
 		"selector.refresh-button" => "%GREEN%Refresh\nLast refresh %DARK_GRAY%%lastrefresh%%GREEN%s ago",
 		"variableSeparator" => "%"
 	];

@@ -20,7 +20,7 @@ commands:
    description: Shows the ServerSelector
    usage: "/serverselector <hostname> [port]"
    permission: ServerSelector.openList
-   aliases: [serverlist, listservers, showSS, showss, SSshow, ssshow]
+   aliases: [serverlist, listservers]
 
 permissions:
   ServerSelector:
