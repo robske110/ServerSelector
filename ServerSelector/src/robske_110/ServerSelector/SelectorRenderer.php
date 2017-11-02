@@ -114,6 +114,7 @@ class SelectorRenderer{
 		if($serverData === null){
 			$serverData = $this->plugin->getSelectorServersManager()->getServers()[$serverID];
 		}
+		$lines = [];
 		if($serverData[2] === null){ //A new server has been added to the Selector and there is no info yet
 			for($line = 0; $line < 2; $line++){
 				$lines[$line] = $this->parseStyle("selector.loading.line".($line + 1), $vars);
@@ -138,6 +139,11 @@ class SelectorRenderer{
 				for($line = 0; $line < 2; $line++){
 					$lines[$line] = $this->parseStyle("selector.offline.line".($line + 1), $vars);
 				}
+			}
+		}
+		for($line = 0; $line < 2; $line++){
+			if(empty($lines[$line])){
+				unset($lines[$line]);
 			}
 		}
 		return $lines;
