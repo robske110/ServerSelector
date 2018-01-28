@@ -19,7 +19,7 @@ class ServerSelectorForm extends MenuForm{
 		$this->options = $optionResponses;
 		$this->player = $player;
 		$this->selectorRenderer = $selectorRenderer;
-		parent::__construct($title, $text, ...$options);
+		parent::__construct($title, $text, $options);
 	}
 	
 	public function onSubmit(Player $player): ?Form{
@@ -42,7 +42,7 @@ class ServerSelectorForm extends MenuForm{
 								private $ip;
 								/** @var int */
 								private $port;
-									
+
 								public function __construct(ServerSelector $plugin, Player $player, string $ip, int $port){
 									parent::__construct($plugin);
 									$this->player = $player;
