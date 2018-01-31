@@ -100,6 +100,9 @@ class ServerSelector extends PluginBase{
 		$this->db = new Config($this->getDataFolder()."ServerSelectorDB.yml", Config::YAML, []); //TODO:betterDB
 		foreach($this->db->getAll() as $savedServer){
 			$server = SelectorServer::createFromSaveData($savedServer);
+			if($server === null){
+				$this->getLogger()->critical("Failed to construct server with data ".implode($savedServer, ",").": Is the permGroup not registered anymore?");
+			}
 			if(!$this->addServer($server)){
 				throw new \InvalidStateException("Failure while registering server ".$server->getID().": Server already registered");
 			}
@@ -257,7 +260,10 @@ class ServerSelector extends PluginBase{
 	 * @return bool
 	 */
 	public function addSelectorServer(string $hostname, int $port, ?string $displayName = null, ?string $permGroup = null, bool $save = true, ?SignServerStats $sss = null): bool{
-		$server = new SelectorServer($hostname, $port, $displayName, $permGroup);
+		$server = new SelectorServer($hostname, $port, $displayName);
+		if(!$server->setPermGroup($permGroup)){
+			return false;
+		}
 		return $this->addServer($server, $save, $sss);
 	}
 	

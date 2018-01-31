@@ -24,13 +24,11 @@ class SelectorServer{
 	 * @param string      $hostname
 	 * @param int         $port
 	 * @param null|string $displayName The displayname which is available as a special var for styles.
-	 * @param null|string $permGroup $permGroup The permgroup (discrete permission) or simply null (for all players)
 	 */
-	public function __construct(string $hostname, int $port, ?string $displayName = null, ?string $permGroup){
+	public function __construct(string $hostname, int $port, ?string $displayName = null){
 		$this->hostname = $hostname;
 		$this->port = $port;
 		$this->displayName = $displayName;
-		$this->setPermGroup($permGroup);
 	}
 
 	/**
@@ -77,7 +75,12 @@ class SelectorServer{
 		}
 		return false;
 	}
-	
+
+	/**
+	 * @param null|string $permGroup The permgroup (discrete permission) or simply null (for all players)
+	 *
+	 * @return bool
+	 */
 	public function setPermGroup(?string $permGroup): bool{
 		if($permGroup !== null){
 			$addPerm = false;
