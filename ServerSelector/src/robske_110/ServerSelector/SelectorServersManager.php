@@ -32,9 +32,8 @@ class SelectorServersManager{
 	}
 	
 	/**
-	 * WARNING: BASICALLY NEVER USE THIS FUNCTION UNLESS YOU ABSOLUTELY KNOW WHAT YOU ARE DOING!
+	 * @internal (DO NOT USE THIS FUNCTION, UNLESS YOU REALLY KNOW WHAT YOU ARE DOING)
 	 * Adds a server to the internal ServerList, but does not check if it has been registered to SSS neither remove it from disk or the real list.
-	 * NOTE: This function is probably not what you want! This will put a server on the list into an unknown state.
 	 *
 	 * @param string $hostname
 	 * @param int    $port

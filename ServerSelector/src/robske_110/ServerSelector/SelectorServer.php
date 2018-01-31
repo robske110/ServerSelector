@@ -2,6 +2,7 @@
 namespace robske_110\ServerSelector;
 
 use pocketmine\Player;
+use pocketmine\Server;
 
 class SelectorServer{
 	/** @var string  */
@@ -10,19 +11,43 @@ class SelectorServer{
 	private $port;
 	
 	/** @var null|string  */
-	private $permgroup;
+	private $displayName;
+	/** @var null|string  */
+	private $permGroup = null;
+	
+	private const SD_HOSTNAME = 0;
+	private const SD_PORT = 1;
+	private const SD_PERMGROUP = 2;
+	private const SD_DISPLAYNAME = 3;
 	
 	/**
 	 * @param string      $hostname
 	 * @param int         $port
-	 * @param null|string $permgroup The permgroup (discrete permission) or simply null (for all players)
+	 * @param null|string $displayName The displayname which is available as a special var for styles.
+	 * @param null|string $permGroup $permGroup The permgroup (discrete permission) or simply null (for all players)
 	 */
-	public function __construct(string $hostname, int $port, ?string $permgroup){
+	public function __construct(string $hostname, int $port, ?string $displayName = null, ?string $permGroup){
 		$this->hostname = $hostname;
 		$this->port = $port;
-		$this->permgroup = $permgroup;
+		$this->displayName = $displayName;
+		$this->setPermGroup($permGroup);
 	}
-	
+
+	/**
+	 * @param array $saveData The array that has been returned by SelectorServer->getSaveData()
+	 *
+	 * @return SelectorServer
+	 */
+	public static function createFromSaveData(array $saveData): ?SelectorServer{
+		$selectorServer = new SelectorServer(
+			$saveData[self::SD_HOSTNAME], $saveData[self::SD_PORT], $saveData[self::SD_DISPLAYNAME]
+		);
+		if(!$selectorServer->setPermGroup($saveData[self::SD_PERMGROUP])){
+			return null;
+		}
+		return $selectorServer;
+	}
+
 	public function getHostname(): string{
 		return $this->hostname;
 	}
@@ -30,24 +55,51 @@ class SelectorServer{
 	public function getPort(): int{
 		return $this->port;
 	}
-	
-	public static function createFromSaveData(array $saveData): SelectorServer{
-		return new SelectorServer($saveData[0], $saveData[1], $saveData[2] == "null" ? null : $saveData[2]);
+
+	public function getID(): string{
+		return $this->hostname."@".$this->port;
 	}
 	
-	public function getSaveData(): array{
-		return [$this->hostname, $this->port, $this->permgroup ?? "null"];
+	public function getDisplayName(): ?string{
+		return $this->displayName;
 	}
-	
-	public function canSee(Player $player){
-		if($this->permgroup === null){
+
+	public function setDisplayName(?string $displayName){
+		$this->displayName = $displayName;
+	}
+
+	public function canSee(Player $player): bool{
+		if($this->permGroup === null){
 			return true;
 		}
-		//TODO
+		if($player->hasPermission($this->permGroup)){
+			return true;
+		}
 		return false;
 	}
 	
-	public function getID(): string{
-		return $this->hostname."@".$this->port;
+	public function setPermGroup(?string $permGroup): bool{
+		if($permGroup !== null){
+			$addPerm = false;
+			if(strpos("ServerSelector.viewServer", $this->permGroup) !== null){
+				if($permGroup !== "ServerSelector.viewServer.".$this->getID()){
+					return false;
+				}
+				$addPerm = true;
+			}
+			if(!isset(Server::getInstance()->getPluginManager()->getPermissions()[$permGroup])){
+				if($addPerm){
+					Server::getInstance()->getPluginManager()->getPermission("ServerSelector.viewServer")->getChildren()[$permGroup] = false;
+				}else{
+					return false;
+				}
+			}
+		}
+		$this->permGroup = $permGroup;
+		return true;
+	}
+
+	public function getSaveData(): array{
+		return [$this->hostname, $this->port, $this->displayName, $this->permGroup];
 	}
 }

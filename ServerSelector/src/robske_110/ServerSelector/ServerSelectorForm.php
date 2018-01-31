@@ -6,6 +6,8 @@ use pocketmine\form\MenuForm;
 use pocketmine\scheduler\PluginTask;
 use pocketmine\utils\TextFormat as TF;
 use pocketmine\Player;
+use robske_110\ServerSelector\event\ServerSelectorCloseEvent;
+use robske_110\ServerSelector\event\ServerSelectorSubmitEvent;
 
 class ServerSelectorForm extends MenuForm{
 	/** @var array */
@@ -31,9 +33,18 @@ class ServerSelectorForm extends MenuForm{
 			if(isset($this->options[$selectedOption])){
 				switch($this->options[$selectedOption][0]){
 					case 0: //refresh
-						$this->selectorRenderer->render($player);
+						$event = new ServerSelectorSubmitEvent($this->selectorRenderer->getPlugin(), $player, $this->options[$selectedOption][0]);
+						$this->selectorRenderer->getPlugin()->getServer()->getPluginManager()->callEvent($event);
+						if(!$event->isCancelled()){
+							$this->selectorRenderer->render($player);
+						}
 					break;
 					case 1: //transfer
+						$event = new ServerSelectorSubmitEvent($this->selectorRenderer->getPlugin(), $player, $this->options[$selectedOption][0], $this->options[$selectedOption][1], $this->options[$selectedOption][2]);
+						$this->selectorRenderer->getPlugin()->getServer()->getPluginManager()->callEvent($event);
+						if($event->isCancelled()){
+							return null;
+						}
 						$this->selectorRenderer->getPlugin()->getServer()->getScheduler()->scheduleDelayedTask(
 							new class($this->selectorRenderer->getPlugin(), $player, $this->options[$selectedOption][1], $this->options[$selectedOption][2]) extends PluginTask{
 								/** @var Player */
@@ -58,14 +69,24 @@ class ServerSelectorForm extends MenuForm{
 						);
 					break;
 					case 2: //offline server
-						$player->sendMessage(
-							TF::RED."The server ".TF::GREEN.$this->options[$selectedOption][1].TF::DARK_GRAY.":".
-							TF::GREEN.$this->options[$selectedOption][2].TF::RED." is offline."
-						);
+						$event = new ServerSelectorSubmitEvent($this->selectorRenderer->getPlugin(), $player, $this->options[$selectedOption][0], $this->options[$selectedOption][1], $this->options[$selectedOption][2]);
+						$this->selectorRenderer->getPlugin()->getServer()->getPluginManager()->callEvent($event);
+						if(!$event->isCancelled()){
+							$player->sendMessage(
+								TF::RED."The server ".TF::GREEN.$this->options[$selectedOption][1].TF::DARK_GRAY.":".
+								TF::GREEN.$this->options[$selectedOption][2].TF::RED." is offline."
+							);
+						}
 					break;
 				}
 			}
 		}
 		return null;
+	}
+	
+	public function onClose(Player $player): ?Form{
+		$event = new ServerSelectorCloseEvent($this->selectorRenderer->getPlugin(), $player);
+		$this->selectorRenderer->getPlugin()->getServer()->getPluginManager()->callEvent($event);
+		return parent::onClose($player);
 	}
 }

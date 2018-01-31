@@ -1,6 +1,6 @@
 name: ServerSelector
 api: [3.0.0-ALPHA10]
-version: 0.1.0-InDev-beta1
+version: 1.0.0-InDev-beta2
 load: POSTWORLD
 main: robske_110\ServerSelector\ServerSelector
 depend: SignServerStats
@@ -9,7 +9,7 @@ author: robske_110
 commands:
  serverselector add:
   description: Adds a sepecified server to the ServerSelector
-  usage: "/serverselector add <hostname> [port]"
+  usage: "/serverselector add <hostname> [port] [displayName]"
   permission: ServerSelector.manageList
  serverselector rem:
   description: Removes a sepecified server from the ServerSelector
@@ -38,3 +38,6 @@ permissions:
       ServerSelector.showLastRefresh:
         description: "Allows to see the last refresh date at the bottom of the selector."
         default: true
+      ServerSelector.viewServer:
+        description: "Children are specific servers you can allow viewing for."
+        default: false

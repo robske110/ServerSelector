@@ -42,7 +42,7 @@ class ServerSelector extends PluginBase{
 	/** @var Server */
 	private $server;
 	
-	const API_VERSION = "0.1.0-InDev";
+	const API_VERSION = "0.2.0";
 	const SSS_API_VERSION = "1.0.0";
 	
 	const DEFAULT_STYLES = [
@@ -82,9 +82,10 @@ class ServerSelector extends PluginBase{
 		if($this->serverSelectorCfg->get("ConfigVersion") != 0.01){
 			$this->serverSelectorCfg->set('selector-open-items', [Item::COMPASS]);
 			$this->serverSelectorCfg->set('selector-item-open-levels', null);
+			/** @TODO */
 			/*$this->serverSelectorCfg->set('selector-item-status-display', true);
-			$this->serverSelectorCfg->set('selector-item-online', );
-			$this->serverSelectorCfg->set('selector-item-offline', );*/
+			$this->serverSelectorCfg->set('selector-item-online', "");
+			$this->serverSelectorCfg->set('selector-item-offline', "");*/
 			$this->serverSelectorCfg->set('hide-offline', false);
 			$this->serverSelectorCfg->set('hide-unknown', false);
 			$this->serverSelectorCfg->set('ConfigVersion', 0.2);
@@ -109,27 +110,6 @@ class ServerSelector extends PluginBase{
 	}
 	
 	/**
-	 * @return SelectorRenderer
-	 */
-	public function getSelectorRenderer(): SelectorRenderer{
-		return $this->selectorRenderer;
-	}
-	
-	/**
-	 * @param Player $player
-	 * @param bool   $force Ignores player permission and event cancellation
-	 */
-	public function openSelector(Player $player, bool $force = false){
-		if($force || $player->hasPermission("ServerSelector.openList")){
-			$event = new ServerSelectorOpenEvent($this, $player); //TODO: isForced
-			$this->server->getPluginManager()->callEvent($event);
-			if($force || !$event->isCancelled()){
-				$this->selectorRenderer->render($player);
-			}
-		}
-	}
-	
-	/**
 	 * This is for extension plugins to test if they are compatible with the version
 	 * of ServerSelector installed. Extending plugins should be disabled/disable any
 	 * interfacing with this plugin if this returns false.
@@ -149,14 +129,21 @@ class ServerSelector extends PluginBase{
 		}
 		return true;
 	}
-	
+
 	/**
-	 * @return SelectorServer[]
+	 * @return SelectorRenderer
 	 */
-	public function getServers(): array{
-		return $this->servers;
+	public function getSelectorRenderer(): SelectorRenderer{
+		return $this->selectorRenderer;
 	}
-	
+
+	/**
+	 * @return SelectorServersManager
+	 */
+	public function getSelectorServersManager(): SelectorServersManager{
+		return $this->selectorServersManager;
+	}
+
 	/**
 	 * @return null|SignServerStats
 	 */
@@ -168,17 +155,44 @@ class ServerSelector extends PluginBase{
 			return null;
 		}
 	}
-	
+
 	/**
-	 * @return SelectorServersManager
+	 * @param Player $player
+	 * @param bool   $force Ignores player permission and event cancellation
 	 */
-	public function getSelectorServersManager(): SelectorServersManager{
-		return $this->selectorServersManager;
+	public function openSelector(Player $player, bool $force = false){
+		if($force || $player->hasPermission("ServerSelector.openList")){
+			$event = new ServerSelectorOpenEvent($this, $player, $force);
+			$this->server->getPluginManager()->callEvent($event);
+			if($force || !$event->isCancelled()){
+				$this->selectorRenderer->render($player);
+			}
+		}
 	}
 	
 	/**
-	 * @param SelectorServer $server
-	 * @param bool $save
+	 * @return SelectorServer[]
+	 */
+	public function getServers(): array{
+		return $this->servers;
+	}
+
+	/**
+	 * @param string $hostname
+	 * @param int    $port
+	 *
+	 * @return null|SelectorServer
+	 */
+	public function getSelectorServer(string $hostname, int $port): ?SelectorServer{
+		if(isset($this->servers[$hostname."@".$port])){
+			return $this->servers[$hostname."@".$port];
+		}
+		return null;
+	}
+	
+	/**
+	 * @param SelectorServer       $server
+	 * @param bool                 $save
 	 * @param null|SignServerStats $sss
 	 *
 	 * @return bool
@@ -203,13 +217,16 @@ class ServerSelector extends PluginBase{
 	}
 	
 	/**
-	 * @param SelectorServer $server
-	 * @param bool $save
+	 * @param SelectorServer       $server
+	 * @param bool                 $save
 	 * @param null|SignServerStats $sss
 	 *
 	 * @return bool
 	 */
 	public function remServer(SelectorServer $server, bool $save = true, ?SignServerStats $sss = null): bool{
+		if($sss === null){
+			$sss = $this->getSSS();
+		}
 		if($this->selectorServersManager->remServer($server->getHostname(), $server->getPort())){
 			unset($this->servers[$server->getID()]);
 			if(array_key_exists($server->getID(), $this->ownedServers)){
@@ -233,14 +250,14 @@ class ServerSelector extends PluginBase{
 	 *
 	 * @param string		       $hostname
 	 * @param int			       $port
+	 * @param null|string          $displayName The displayname which is available as a special var for styles.
 	 * @param null|string          $permGroup The permgroup (discrete permission) or simply null (for all players)
-	 * @param bool			       $save Whether the server should be saved to disk and reloaded on next reboot or not.
 	 * @param null|SignServerStats $sss
 	 *
 	 * @return bool
 	 */
-	public function addSelectorServer(string $hostname, int $port, ?string $permGroup = null, bool $save = true, ?SignServerStats $sss = null): bool{
-		$server = new SelectorServer($hostname, $port, $permGroup);
+	public function addSelectorServer(string $hostname, int $port, ?string $displayName = null, ?string $permGroup = null, bool $save = true, ?SignServerStats $sss = null): bool{
+		$server = new SelectorServer($hostname, $port, $displayName, $permGroup);
 		return $this->addServer($server, $save, $sss);
 	}
 	
@@ -249,7 +266,7 @@ class ServerSelector extends PluginBase{
 	 *
 	 * @param string		  $hostname
 	 * @param int			  $port
-	 * @param bool			  $save Whether the removal should be saved to disk and therfore whether the server
+	 * @param bool			  $save Whether the removal should be saved to disk and therefore whether the server
 	 *                        should also be gone on next reboot or not.
 	 * @param SignServerStats $sss
 	 *
@@ -263,26 +280,35 @@ class ServerSelector extends PluginBase{
 			return false;
 		}
 	}
-	
+
+	public static function getHRServerName(string $hostname, int $port, string $terminate = TF::GREEN): string{
+		return TF::DARK_GRAY.$hostname.TF::GRAY.":".TF::DARK_GRAY.$port.$terminate;
+	}
+
 	public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool{
 		switch($command->getName()){
 			case "serverselector add":
 			case "serverselector rem":
+			case "serverselector edit":
 				if(isset($args[0])){
 					$hostname = $args[0];
 					$port = 19132;
+					$nextUserArg = 1;
 					if(isset($args[1])){
 						if(is_numeric($args[1])){
 							$port = $args[1];
-						}else{
-							return false;
+							$nextUserArg = 2;
 						}
 					}
 				}else{
+					if($command->getName() === "serverselector edit"){
+						$sender->sendMessage(TF::GREEN."Possible fields to edit: displayName, perm (Use /serverselector edit <hostname> [ip] <field> <value>)");
+						return true;
+					}
 					return false;
 				}
 				if(($sss = $this->getSSS()) === null){
-					$sender->sendMessage("Error. Check console.");
+					$sender->sendMessage("Error. Please check the console.");
 					return true;
 				}
 			break;
@@ -295,22 +321,29 @@ class ServerSelector extends PluginBase{
 		}
 		switch($command->getName()){
 			case "serverselector add":
-				if($this->addSelectorServer($hostname, $port, null, true, $sss)){
+				$displayName = null;
+				if(isset($args[$nextUserArg])){
+					$displayName = $args[$nextUserArg];
+				}
+				if($this->addSelectorServer($hostname, $port, $displayName, null, $sss)){
 					$sender->sendMessage(
 						TF::GREEN."Successfully added the server ".
-						TF::DARK_GRAY.$hostname.TF::GRAY.":".TF::DARK_GRAY.$port.TF::GREEN.
+						self::getHRServerName($hostname, $port).
 						" to the ServerSelector."
 					);
 				}else{
 					$sender->sendMessage(
 						TF::DARK_RED."The server ".
-						TF::DARK_GRAY.$hostname.TF::GRAY.":".TF::DARK_GRAY.$port.TF::DARK_RED.
+						self::getHRServerName($hostname, $port, TF::DARK_RED).
 						" is already on the ServerSelector!"
 					);
 				}
 				return true;
 			break;
 			case "serverselector rem":
+				if($nextUserArg === 1 && isset($args[1])){
+					return false;
+				}
 				if($this->remSelectorServer($hostname, $port, true, $sss)){
 					$sender->sendMessage(
 						TF::GREEN."Successfully removed the server ".
@@ -320,11 +353,60 @@ class ServerSelector extends PluginBase{
 				}else{
 					$sender->sendMessage(
 						TF::DARK_RED."The server ".
-						TF::DARK_GRAY.$hostname.TF::GRAY.":".TF::DARK_GRAY.$port.TF::DARK_RED.
+						self::getHRServerName($hostname, $port, TF::DARK_RED).
 						" is not on the ServerSelector!"
 					);
 				}
 				return true;
+			break;
+			case "serverselector edit":
+				if(($selectorServer = $this->getSelectorServer($hostname, $port)) === null){
+					$sender->sendMessage(
+						TF::DARK_RED."The server ".
+						self::getHRServerName($hostname, $port, TF::DARK_RED).
+							" is not on the ServerSelector!"
+						);
+						return true;
+				}
+				if(!isset($args[$nextUserArg])){
+					return false;
+				}
+				switch($args[$nextUserArg]){
+					case "displayName":
+						if(!isset($args[$nextUserArg+1])){
+							$sender->sendMessage(TF::DARK_RED."Please supply a displayName");
+							return true;
+						}
+						$selectorServer->setDisplayName($args[$nextUserArg+1]);
+						$sender->sendMessage(
+							TF::GREEN."Successfully set the displayName of the server ".
+							self::getHRServerName($hostname, $port).
+							" to ".TF::DARK_GRAY.$args[$nextUserArg+1].TF::GREEN."."
+						);
+					break;
+					case "perm":
+						if(!isset($args[$nextUserArg+1])){
+							$sender->sendMessage(TF::DARK_RED."Please supply a permGroup (discrete permission)");
+							return true;
+						}
+						if($selectorServer->setPermGroup($args[$nextUserArg+1])){
+							$sender->sendMessage(
+								TF::GREEN."Successfully set the perm of the server ".
+								self::getHRServerName($hostname, $port).
+								" to ".TF::DARK_GRAY.$args[$nextUserArg+1].TF::GREEN."."
+							);
+						}else{
+							$sender->sendMessage(
+								TF::DARK_RED."Failed to set the perm of the server ".
+								self::getHRServerName($hostname, $port, TF::DARK_RED).
+								" to ".TF::DARK_GRAY.$args[$nextUserArg+1].TF::DARK_RED.": Non-existent permission!"
+							);
+						}
+					break;
+					default:
+						$sender->sendMessage(TF::GREEN."Possible fields to edit: displayName, perm (Use /serverselector edit <hostname> [ip] <field> <value>)");
+					break;
+				}
 			break;
 		}
 		return false;

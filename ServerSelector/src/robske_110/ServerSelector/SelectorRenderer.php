@@ -61,7 +61,7 @@ class SelectorRenderer{
 					if($state === 2 && $this->hideOffline){
 						continue;
 					}
-					$options[] = new MenuOption(implode("\n".TF::RESET,$this->calcServerButtonLines($selectorServer->getID(), $serversData[$selectorServer->getID()])));
+					$options[] = new MenuOption(implode("\n".TF::RESET,$this->calcServerButtonLines($selectorServer, $serversData[$selectorServer->getID()])));
 				}elseif(!$this->hideUnknown){
 					$options[] = new MenuOption($this->parseStyle("selector.unknown.error")."\n".TF::WHITE.$selectorServer->getID());
 					$state = 2;
@@ -71,7 +71,7 @@ class SelectorRenderer{
 		}
 		$options[] = new MenuOption(
 			$this->parseStyle("selector.refresh-button", [
-				'lastrefresh' => round(($this->plugin->getServer()->getTick() - $this->plugin->getSelectorServersManager()->getStatusServerRefreshTick()) / 20, 1)
+					'lastrefresh' => round(($this->plugin->getServer()->getTick() - $this->plugin->getSelectorServersManager()->getStatusServerRefreshTick()) / 20, 1)
 				]
 			)
 		);
@@ -99,20 +99,20 @@ class SelectorRenderer{
 	}
 	
 	/**
-	 * @param string     $serverID
-	 * @param array|null $serverData
+	 * @param SelectorServer $selectorServer
+	 * @param array|null     $serverData
 	 *
 	 * @return array $lines
 	 */
-	private function calcServerButtonLines(string $serverID, ?array $serverData = null): array{
-		$address = explode("@", $serverID);
+	private function calcServerButtonLines(SelectorServer $selectorServer, ?array $serverData = null): array{
 		$vars = [
-			"ip" => $address[0],
-			"port" => $address[1],
-			"playercount" => $this->styleCfg->get('selector.unknown.playercount')
+			"ip" => $selectorServer->getHostname(),
+			"port" => $selectorServer->getPort(),
+			"playercount" => $this->styleCfg->get('selector.unknown.playercount'),
+			"displayname" => $selectorServer->getDisplayName() ?? ""
 		];
 		if($serverData === null){
-			$serverData = $this->plugin->getSelectorServersManager()->getServers()[$serverID];
+			$serverData = $this->plugin->getSelectorServersManager()->getServers()[$selectorServer->getID()];
 		}
 		$lines = [];
 		if($serverData[2] === null){ //A new server has been added to the Selector and there is no info yet
@@ -122,15 +122,11 @@ class SelectorRenderer{
 		}else{
 			if($serverData[2]){
 				$playerData = $serverData[3];
-				$vars = [
-					"ip" => $address[0],
-					"port" => $address[1],
-					"modt" => $serverData[4] ?? TF::DARK_RED."ERROR",
-					"playercount" => $this->parseStyle('selector.known.playercount', [
-						'currPlayers' => $playerData[0] ?? "-",
-						'maxPlayers' => $playerData[1] ?? "-"
-					])
-				];
+				$vars["modt"] = $serverData[4] ?? TF::DARK_RED."ERROR";
+				$vars["playercount"] = $this->parseStyle('selector.known.playercount', [
+					'currPlayers' => $playerData[0] ?? "-",
+					'maxPlayers' => $playerData[1] ?? "-"
+				]);
 				
 				for($line = 0; $line < 2; $line++){
 					$lines[$line] = $this->parseStyle("selector.online.line".($line + 1), $vars);
