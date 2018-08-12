@@ -1,6 +1,6 @@
 name: ServerSelector
-api: [3.0.0-ALPHA10]
-version: 1.0.0-InDev-beta2
+api: 3.1
+version: 1.0.0-InDev-beta3
 load: POSTWORLD
 main: robske_110\ServerSelector\ServerSelector
 depend: SignServerStats

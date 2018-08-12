@@ -3,7 +3,7 @@ namespace robske_110\ServerSelector;
 
 use pocketmine\form\Form;
 use pocketmine\form\MenuForm;
-use pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat as TF;
 use pocketmine\Player;
 use robske_110\ServerSelector\event\ServerSelectorCloseEvent;
@@ -24,12 +24,11 @@ class ServerSelectorForm extends MenuForm{
 		parent::__construct($title, $text, $options);
 	}
 	
-	public function onSubmit(Player $player): ?Form{
+	public function onSubmit(Player $player, int $selectedOption): ?Form{
 		if(!$this->selectorRenderer->getPlugin()->isEnabled()){
 			return null;
 		}
 		if($player->getId() === $this->player->getId()){
-			$selectedOption = $this->getSelectedOptionIndex();
 			if(isset($this->options[$selectedOption])){
 				switch($this->options[$selectedOption][0]){
 					case 0: //refresh
@@ -45,8 +44,8 @@ class ServerSelectorForm extends MenuForm{
 						if($event->isCancelled()){
 							return null;
 						}
-						$this->selectorRenderer->getPlugin()->getServer()->getScheduler()->scheduleDelayedTask(
-							new class($this->selectorRenderer->getPlugin(), $player, $this->options[$selectedOption][1], $this->options[$selectedOption][2]) extends PluginTask{
+						$this->selectorRenderer->getPlugin()->getScheduler()->scheduleDelayedTask(
+							new class($player, $this->options[$selectedOption][1], $this->options[$selectedOption][2]) extends Task{
 								/** @var Player */
 								private $player;
 								/** @var string */
@@ -54,8 +53,7 @@ class ServerSelectorForm extends MenuForm{
 								/** @var int */
 								private $port;
 
-								public function __construct(ServerSelector $plugin, Player $player, string $ip, int $port){
-									parent::__construct($plugin);
+								public function __construct(Player $player, string $ip, int $port){
 									$this->player = $player;
 									$this->ip = $ip;
 									$this->port = $port;
