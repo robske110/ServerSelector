@@ -331,7 +331,7 @@ class ServerSelector extends PluginBase{
 				if(isset($args[$nextUserArg])){
 					$displayName = $args[$nextUserArg];
 				}
-				if($this->addSelectorServer($hostname, $port, $displayName, null, $sss)){
+				if($this->addSelectorServer($hostname, $port, $displayName, null, true, $sss)){
 					$sender->sendMessage(
 						TF::GREEN."Successfully added the server ".
 						self::getHRServerName($hostname, $port).
