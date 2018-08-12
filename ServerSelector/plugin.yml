@@ -11,6 +11,10 @@ commands:
   description: Adds a sepecified server to the ServerSelector
   usage: "/serverselector add <hostname> [port] [displayName]"
   permission: ServerSelector.manageList
+ serverselector edit:
+  description: Edits fields of a sepecified server from the ServerSelector
+  usage: "/serverselector edit <hostname> [port] <field> <value>"
+  permission: ServerSelector.manageList
  serverselector rem:
   description: Removes a sepecified server from the ServerSelector
   usage: "/serverselector rem <hostname> [port]"
