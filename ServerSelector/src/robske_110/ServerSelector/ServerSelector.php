@@ -308,7 +308,7 @@ class ServerSelector extends PluginBase{
 					}
 				}else{
 					if($command->getName() === "serverselector edit"){
-						$sender->sendMessage(TF::GREEN."Possible fields to edit: displayName, perm (Use /serverselector edit <hostname> [ip] <field> <value>)");
+						$sender->sendMessage(TF::GREEN."Possible fields to edit: displayName, perm (Use /serverselector edit <hostname> [port] <field> <value>)");
 						return true;
 					}
 					return false;
