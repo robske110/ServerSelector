@@ -323,6 +323,12 @@ class ServerSelector extends PluginBase{
 			case "serverselector show":
 				if($sender instanceof Player){
 					$this->openSelector($sender);
+				}else{
+					foreach($this->getServers() as $selectorServer){
+						$sender->sendMessage(
+							$selectorServer->getID().": "."Displayname: ".($selectorServer->getDisplayName() ?? "none")
+						);
+					}
 				}
 				return true;
 			break;
