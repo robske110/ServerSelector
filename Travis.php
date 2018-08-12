@@ -13,7 +13,7 @@ foreach($plugins as $info){
 	}
 }
 
-$server = proc_open(PHP_BINARY . " src/pocketmine/PocketMine.php --no-wizard --disable-readline", [
+$server = proc_open(PHP_BINARY . " src/pocketmine/PocketMine.php --no-wizard --disable-readline --settings.enable-dev-builds=true", [
 	0 => ["pipe", "r"],
 	1 => ["pipe", "w"],
 	2 => ["pipe", "w"]
@@ -46,7 +46,7 @@ foreach($plugins as $pluginName => $info){
 	if(!$info[1]){
 		continue;
 	}
-	if(count(glob("plugins/DevTools/".$pluginName."*.phar")) === 0){
+	if(count(glob("plugin_data/DevTools/".$pluginName."*.phar")) === 0){
 		echo("Failed to create ".$pluginName." phar!\n");
 		$exit = 1;
 	}else{

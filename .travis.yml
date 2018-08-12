@@ -22,18 +22,18 @@ before_script:
  - cd ..
  - echo "extension=pthreads.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
  - echo | pecl install channel://pecl.php.net/yaml-2.0.2
- - git clone --recursive https://github.com/pmmp/PocketMine-MP.git --depth=1
+ - git clone --recursive --branch forms-api https://github.com/pmmp/PocketMine-MP.git --depth=1
  - cd PocketMine-MP
  - composer install
  - mkdir plugins
  - cd plugins
- - wget -O DevTools.phar https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/artifact/DevTools.phar
+ - wget -O DevTools.phar https://jenkins.pmmp.io/job/PocketMine-MP/Alpha/artifact/DevTools.phar
  - cd /home/travis/build/robske110/ServerSelector/
  - cp -rf Travis.php PocketMine-MP/
  - cd PocketMine-MP
 
 script:
  - php Travis.php
- 
+
 notifications:
  email: false
