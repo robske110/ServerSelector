@@ -255,6 +255,8 @@ class ServerSelector extends PluginBase{
 	 * @param int			       $port
 	 * @param null|string          $displayName The displayname which is available as a special var for styles.
 	 * @param null|string          $permGroup The permgroup (discrete permission) or simply null (for all players)
+	 * @param bool			       $save Whether the server should be saved to disk and therefore whether the server
+	 *                             should also be gone on next reboot or not.
 	 * @param null|SignServerStats $sss
 	 *
 	 * @return bool
@@ -270,15 +272,15 @@ class ServerSelector extends PluginBase{
 	/**
 	 * Removes a Server from the ServerSelector
 	 *
-	 * @param string		  $hostname
-	 * @param int			  $port
-	 * @param bool			  $save Whether the removal should be saved to disk and therefore whether the server
-	 *                        should also be gone on next reboot or not.
-	 * @param SignServerStats $sss
+	 * @param string		       $hostname
+	 * @param int			       $port
+	 * @param bool			       $save Whether the removal should be saved to disk and therefore whether the server
+	 *                             should also be gone on next reboot or not.
+	 * @param null|SignServerStats $sss
 	 *
 	 * @return bool
 	 */
-	public function remSelectorServer(string $hostname, int $port, bool $save = true, SignServerStats $sss): bool{
+	public function remSelectorServer(string $hostname, int $port, bool $save = true, ?SignServerStats $sss = null): bool{
 		if(isset($this->servers[$hostname."@".$port])){
 			$server = $this->servers[$hostname."@".$port];
 			return $this->remServer($server, $save, $sss);
