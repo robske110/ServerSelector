@@ -33,7 +33,7 @@ permissions:
         description: "Allows to manage the ServerSelector list."
         default: op
       ServerSelector.servertransfer:
-        description: "Allows to click on a Server in the List and get transfered to that server."
+        description: "Allows to click on a Server in the List and get transferred to that server."
         default: true  
       ServerSelector.showLastRefresh:
         description: "Allows to see the last refresh date at the bottom of the selector."
