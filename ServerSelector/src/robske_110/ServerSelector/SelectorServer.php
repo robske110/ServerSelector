@@ -17,8 +17,8 @@ class SelectorServer{
 	
 	private const SD_HOSTNAME = 0;
 	private const SD_PORT = 1;
-	private const SD_PERMGROUP = 2;
-	private const SD_DISPLAYNAME = 3;
+	private const SD_DISPLAYNAME = 2;
+	private const SD_PERMGROUP = 3;
 	
 	/**
 	 * @param string      $hostname
