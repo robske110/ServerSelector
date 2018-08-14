@@ -29,6 +29,7 @@ before_script:
  - cd plugins
  - wget -O DevTools.phar https://jenkins.pmmp.io/job/PocketMine-MP/Alpha/artifact/DevTools.phar
  - cd /home/travis/build/robske110/ServerSelector/
+ - git clone https://github.com/robske110/SignServerStats.git --depth=1
  - cp -rf Travis.php PocketMine-MP/
  - cd PocketMine-MP
 

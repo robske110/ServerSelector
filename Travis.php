@@ -1,6 +1,6 @@
 <?php
 $repoPath = "/home/travis/build/robske110/ServerSelector/";
-$plugins = ["ServerSelector" => ["ServerSelector/", true]];
+$plugins = ["ServerSelector" => ["ServerSelector/", true], "SignServerStats" => ["SignServerStats/SSS/", true]];
 
 foreach($plugins as $info){
 	$info[0] = $repoPath.$info[0];
